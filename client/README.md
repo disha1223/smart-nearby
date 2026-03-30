@@ -1,70 +1,164 @@
-# Getting Started with Create React App
+# 📍 MoodSpot – Smart Nearby Place Finder
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## 📌 Description
 
-## Available Scripts
+MoodSpot is a full-stack web application that helps users discover nearby places based on their mood, preferences, and budget. It uses real-time location (GPS) or selected cities like Manipal and Mangaluru to recommend cafes, clubs, tourist spots, and other experiences.
 
-In the project directory, you can run:
+---
 
-### `npm start`
+## 🚀 Features
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### 🎯 Core Features
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+* Mood-based recommendations (Work, Date, Quick Bite, Budget)
+* Real-time location detection using Geolocation API
+* City toggle (Manipal / Mangaluru)
+* Radius-based filtering (1km – 10km)
+* Budget filtering (₹1000 / ₹2000 / ₹5000)
 
-### `npm test`
+### 🔎 Advanced Features
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+* Search by name, type, or location
+* Sort by:
 
-### `npm run build`
+  * Rating ⭐
+  * Reviews 💬
+  * Name 🔤
+* "Open Now" filter 🕐
+* Clean and modern UI
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### ⭐ User Features
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+* Save favourite places (stored using localStorage)
+* Favourites tab
+* Place detail modal (ratings, address, contact, etc.)
+* Direct Google Maps navigation
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+---
 
-### `npm run eject`
+## 🛠️ Tech Stack
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### Frontend
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+* React.js
+* CSS (custom UI design)
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Backend
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+* Node.js
+* Express.js
 
-## Learn More
+### APIs & Tools
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+* SerpAPI (Google Maps data)
+* Browser Geolocation API
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+---
 
-### Code Splitting
+## 📂 Project Structure
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+```plaintext
+mood-places/
+│── client/        # React frontend
+│── server/        # Node.js backend
+```
 
-### Analyzing the Bundle Size
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## ▶️ How to Run
 
-### Making a Progressive Web App
+### 1️⃣ Clone the Repository
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+```
+git clone https://github.com/disha1223/smart-nearby.git
+cd smart-nearby
+```
 
-### Advanced Configuration
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+### 2️⃣ Setup Backend
 
-### Deployment
+```
+cd server
+npm install
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+Create `.env` file:
 
-### `npm run build` fails to minify
+```
+SERPAPI_KEY=your_api_key_here
+PORT=5000
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Run backend:
+
+```
+npm run dev
+```
+
+---
+
+### 3️⃣ Setup Frontend
+
+```
+cd ../client
+npm install
+npm start
+```
+
+---
+
+## 🌍 How It Works
+
+1. User selects a mood (Work, Date, etc.)
+2. App detects location (GPS or selected city)
+3. Frontend sends request to backend
+4. Backend fetches data using SerpAPI (Google Maps)
+5. Results are filtered and displayed in a clean UI
+
+---
+
+## 📸 Screenshots
+
+*Add your UI screenshots here (recommended for better presentation)*
+
+---
+
+## 🎯 Future Improvements
+
+* 🎉 Add category-based exploration:
+
+  * Clubs & nightlife
+  * Cafes
+  * Tourist spots (beaches, hidden gems)
+  * Gaming zones (Glitch, Trigger, Black Tiger, etc.)
+  * Movie theatres
+  * Gyms
+  * Vehicle rentals
+
+* 🧭 Discover hidden and less-known places
+
+* 📍 Show “happening places” in cities like Manipal & Mangaluru
+
+* 🗺️ Map integration for better visualization
+
+* 📊 Show trending places in real-time
+
+* 🧠 Smart recommendations based on user behavior
+
+* 💡 Investment insights:
+
+  * Identify high-demand areas
+  * Suggest potential business opportunities
+
+---
+
+## 👤 Author
+
+**Disha**
+
+---
+
+## 💡 Note
+
+This project was built to explore full-stack development, API integration, and frontend UI design while solving a real-world problem of discovering places based on user mood and context.
