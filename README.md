@@ -62,50 +62,6 @@ mood-places/
 │── client/        # React frontend
 │── server/        # Node.js backend
 ```
-
----
-
-## ▶️ How to Run
-
-### 1️⃣ Clone the Repository
-
-```
-git clone https://github.com/disha1223/smart-nearby.git
-cd smart-nearby
-```
-
----
-
-### 2️⃣ Setup Backend
-
-```
-cd server
-npm install
-```
-
-Create `.env` file:
-
-```
-SERPAPI_KEY=your_api_key_here
-PORT=5000
-```
-
-Run backend:
-
-```
-npm run dev
-```
-
----
-
-### 3️⃣ Setup Frontend
-
-```
-cd ../client
-npm install
-npm start
-```
-
 ---
 
 ## 🌍 How It Works
@@ -144,12 +100,6 @@ npm start
 
   * Identify high-demand areas
   * Suggest potential business opportunities
-
----
-
-## 👤 Author
-
-**Disha**
 
 ---
 
