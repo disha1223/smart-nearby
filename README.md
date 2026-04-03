@@ -118,12 +118,6 @@ npm start
 
 ---
 
-## 📸 Screenshots
-
-*Add your UI screenshots here (recommended for better presentation)*
-
----
-
 ## 🎯 Future Improvements
 
 * 🎉 Add category-based exploration:
