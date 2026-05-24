@@ -1,0 +1,209 @@
+body {
+
+  margin: 0;
+
+  font-family: "Inter", sans-serif;
+
+  background: #0f172a;
+
+}
+
+
+.landing {
+
+  min-height: 100vh;
+
+  color: white;
+
+  background:
+    radial-gradient(circle at top left, #7c3aed, transparent 30%),
+    radial-gradient(circle at bottom right, #2563eb, transparent 30%),
+    #0f172a;
+
+}
+
+
+.landing-nav {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  padding: 24px 60px;
+
+}
+
+
+.landing-nav h1 {
+
+  margin: 0;
+
+}
+
+
+.landing-nav div {
+
+  display: flex;
+
+  gap: 16px;
+
+}
+
+
+.landing-nav a {
+
+  text-decoration: none;
+
+  color: white;
+
+  padding: 12px 20px;
+
+  border-radius: 14px;
+
+  background: rgba(255,255,255,0.08);
+
+  backdrop-filter: blur(10px);
+
+  transition: 0.3s;
+
+}
+
+
+.landing-nav a:hover {
+
+  background: #8b5cf6;
+
+}
+
+
+.hero {
+
+  height: 70vh;
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  text-align: center;
+
+  padding: 20px;
+
+}
+
+
+.hero-content h1 {
+
+  font-size: 72px;
+
+  margin-bottom: 20px;
+
+}
+
+
+.hero-content span {
+
+  color: #a78bfa;
+
+}
+
+
+.hero-content p {
+
+  font-size: 22px;
+
+  color: #cbd5e1;
+
+}
+
+
+.hero-buttons {
+
+  margin-top: 40px;
+
+  display: flex;
+
+  justify-content: center;
+
+  gap: 20px;
+
+}
+
+
+.primary-btn,
+.secondary-btn {
+
+  text-decoration: none;
+
+  padding: 16px 28px;
+
+  border-radius: 16px;
+
+  font-weight: bold;
+
+  transition: 0.3s;
+
+}
+
+
+.primary-btn {
+
+  background: #8b5cf6;
+
+  color: white;
+
+}
+
+
+.secondary-btn {
+
+  border: 1px solid rgba(255,255,255,0.2);
+
+  color: white;
+
+}
+
+
+.primary-btn:hover,
+.secondary-btn:hover {
+
+  transform: translateY(-3px);
+
+}
+
+
+.features {
+
+  display: flex;
+
+  justify-content: center;
+
+  gap: 24px;
+
+  padding: 40px;
+
+  flex-wrap: wrap;
+
+}
+
+
+.feature-card {
+
+  padding: 28px;
+
+  border-radius: 20px;
+
+  background: rgba(255,255,255,0.08);
+
+  backdrop-filter: blur(10px);
+
+  min-width: 240px;
+
+  text-align: center;
+
+  font-size: 18px;
+
+}

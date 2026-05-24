@@ -1,0 +1,66 @@
+.navbar {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  padding: 20px 40px;
+
+  background: #1f2438;
+
+}
+
+.logo {
+
+  color: white;
+
+  font-size: 2rem;
+
+  font-weight: bold;
+
+}
+
+.nav-links {
+
+  display: flex;
+
+  gap: 15px;
+
+  align-items: center;
+
+}
+
+.nav-links a,
+.logout-btn {
+
+  text-decoration: none;
+
+  background: #2a3049;
+
+  color: white;
+
+  padding: 10px 20px;
+
+  border-radius: 15px;
+
+  border: none;
+
+  cursor: pointer;
+
+  font-size: 1rem;
+
+}
+
+.user-section {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 15px;
+
+  color: white;
+
+}

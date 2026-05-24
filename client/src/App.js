@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+} from "react-router-dom";
 
+import Signup from "./pages/Signup";
+import LandingPage from "./pages/landingpage";
+import Login from "./pages/Login";
+import Navbar from "./components/Navbar";
 const MOODS = [
   { key: "work", emoji: "💼", label: "Work", sub: "Wifi · Quiet", color: "#667eea", bg: "#eef0ff" },
   { key: "date", emoji: "🌹", label: "Date", sub: "Cozy · Romantic", color: "#f093fb", bg: "#fdf0ff" },
@@ -26,7 +35,7 @@ const SORT_OPTIONS = [
   { label: "🔤 Name", value: "name" },
 ];
 
-export default function App() {
+function Dashboard() {
   const [mood, setMood] = useState("");
   const [city, setCity] = useState(CITIES[0]);
   const [useGPS, setUseGPS] = useState(true);
@@ -41,10 +50,7 @@ export default function App() {
   const [error, setError] = useState("");
   const [searched, setSearched] = useState(false);
   const [selectedPlace, setSelectedPlace] = useState(null);
-  const [favourites, setFavourites] = useState(() => {
-    const saved = localStorage.getItem("moodspot_favs");
-    return saved ? JSON.parse(saved) : [];
-  });
+const [favourites, setFavourites] = useState([]);
   const [activeTab, setActiveTab] = useState("explore");
 
   useEffect(() => {
@@ -54,10 +60,24 @@ export default function App() {
     );
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem("moodspot_favs", JSON.stringify(favourites));
-  }, [favourites]);
 
+
+  // ✅ ADD HERE (line 62)
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    fetch("http://localhost:5000/api/user/favourites", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) setFavourites(data);
+      })
+      .catch(console.error);
+  }, []);
+
+ // line 63 continues as normal
   const getLocation = () =>
     useGPS && gpsLocation ? gpsLocation : { lat: city.lat, lon: city.lon };
 
@@ -75,8 +95,7 @@ export default function App() {
         mood, lat: loc.lat, lon: loc.lon, radius,
         ...(budget && { maxPrice: budget }),
       });
-      const res = await fetch(`http://localhost:5000/api/places?${params}`);
-      const data = await res.json();
+const res = await fetch(`http://localhost:5000/api/places?${params}`);      const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       setPlaces(data.results || []);
     } catch (err) {
@@ -86,13 +105,46 @@ export default function App() {
     }
   };
 
-  const toggleFav = (place) => {
-    setFavourites((prev) => {
-      const exists = prev.find((p) => p.title === place.title);
-      if (exists) return prev.filter((p) => p.title !== place.title);
-      return [...prev, place];
-    });
-  };
+// REPLACE your toggleFav with this
+const toggleFav = async (place) => {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    const exists = favourites.find((p) => p.title === place.title);
+
+    if (exists) {
+      // ✅ Remove from local state
+      setFavourites((prev) => prev.filter((p) => p.title !== place.title));
+
+      // ✅ Remove from DB
+      await fetch("http://localhost:5000/api/user/favourite", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ title: place.title }),
+      });
+
+    } else {
+      // ✅ Add to local state
+      setFavourites((prev) => [...prev, place]);
+
+      // ✅ Add to DB
+      await fetch("http://localhost:5000/api/user/favourite", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(place),
+      });
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
 
   const isFav = (place) => favourites.some((p) => p.title === place.title);
 
@@ -131,11 +183,13 @@ export default function App() {
 
   return (
     <div>
-      {/* Header */}
+      <Navbar />
       <div className="header">
         <h1>📍 MoodSpot</h1>
         <p>Find the perfect place for your vibe</p>
-      </div>
+      
+
+</div>
 
       <div className="container">
         {/* Tabs */}
@@ -402,5 +456,40 @@ export default function App() {
         </div>
       )}
     </div>
+  );
+}
+export default function App() {
+
+  return (
+
+    <BrowserRouter>
+
+      <Routes>
+
+        <Route
+          path="/"
+          element={<LandingPage />}
+        />
+
+        <Route
+          path="/dashboard"
+          element={<Dashboard />}
+        />
+
+        <Route
+          path="/login"
+          element={<Login />}
+        />
+
+        <Route
+          path="/signup"
+          element={<Signup />}
+        />
+
+      </Routes>
+
+    </BrowserRouter>
+    
+
   );
 }
