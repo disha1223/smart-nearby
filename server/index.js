@@ -25,10 +25,8 @@ app.use(express.json());
 app.use("/api/places", placesRouter);
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
-app.listen(PORT, () => {
-
+app.listen(PORT, "0.0.0.0", () => {
   console.log(
     `Server running on http://localhost:${PORT}`
   );
-
 });
