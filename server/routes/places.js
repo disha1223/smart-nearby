@@ -1,33 +1,18 @@
 const express = require("express");
 const router = express.Router();
-const axios = require("axios");
+const Place = require("../models/Place");
 
-const MOOD_CONFIG = {
-  work: {
-    "$":   "small budget cafes with wifi",
-    "$$":  "cafes with wifi",
-    "$$$": "premium coworking cafes",
-    "":    "cafes with wifi",
-  },
-  date: {
-    "$":   "affordable romantic restaurants",
-    "$$":  "mid range romantic restaurants",
-    "$$$": "fine dining romantic restaurants",
-    "":    "romantic restaurants",
-  },
-  "quick-bite": {
-    "$":   "street food stalls cheap eats",
-    "$$":  "fast food restaurants",
-    "$$$": "quick casual dining",
-    "":    "fast food nearby",
-  },
-  budget: {
-    "$":   "cheapest food under 100 rupees",
-    "$$":  "affordable restaurants under 200 rupees",
-    "$$$": "budget friendly restaurants",
-    "":    "cheap eats nearby",
-  },
-};
+function getDistanceKm(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.asin(Math.sqrt(a));
+}
 
 router.get("/", async (req, res) => {
   const { mood, lat, lon, radius = 3, maxPrice } = req.query;
@@ -36,31 +21,22 @@ router.get("/", async (req, res) => {
     return res.status(400).json({ error: "mood, lat and lon are required" });
   }
 
-  const moodQueries = MOOD_CONFIG[mood];
-  if (!moodQueries) {
-    return res.status(400).json({ error: "Invalid mood" });
-  }
-
-  // Pick query based on budget
-  const query = moodQueries[maxPrice] || moodQueries[""];
-
   try {
-    const response = await axios.get("https://serpapi.com/search", {
-      params: {
-        api_key: process.env.SERPAPI_KEY,
-        engine: "google_maps",
-        q: query,
-        ll: `@${lat},${lon},14z`,
-        type: "search",
-        hl: "en",
-      },
-    });
+    const filter = { mood_tags: mood };
+    if (maxPrice) filter.price_level = maxPrice;
 
-    const results = response.data.local_results || [];
-    res.json({ mood, query, results, total: results.length });
+    let results = await Place.find(filter).lean();
 
+    results = results
+      .map((p) => ({
+        ...p,
+        distance: getDistanceKm(parseFloat(lat), parseFloat(lon), p.lat, p.lon),
+      }))
+      .filter((p) => p.distance <= Number(radius));
+
+    res.json({ mood, results, total: results.length });
   } catch (err) {
-    console.error(err.message);
+    console.error("ERROR:", err.message);
     res.status(500).json({ error: "Failed to fetch places" });
   }
 });

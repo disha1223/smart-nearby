@@ -57,8 +57,6 @@ function Signup() {
       );
 
 
-      alert("Signup Successful 😭🔥");
-
       navigate("/login");
 
     } catch (error) {
@@ -78,9 +76,8 @@ function Signup() {
         onSubmit={handleSubmit}
       >
 
-        <h1>MoodSpot 🌃</h1>
-
-        <p>Create your account</p>
+        <h1>Create Account</h1>
+<p>Join Smart Nearby and discover places that match your mood</p>
 
 
         <input

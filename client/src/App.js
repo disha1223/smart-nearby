@@ -11,16 +11,27 @@ import LandingPage from "./pages/landingpage";
 import Login from "./pages/Login";
 import Navbar from "./components/Navbar";
 const MOODS = [
-  { key: "work", emoji: "💼", label: "Work", sub: "Wifi · Quiet", color: "#667eea", bg: "#eef0ff" },
-  { key: "date", emoji: "🌹", label: "Date", sub: "Cozy · Romantic", color: "#f093fb", bg: "#fdf0ff" },
-  { key: "quick-bite", emoji: "⚡", label: "Quick Bite", sub: "Fast · Easy", color: "#f59e0b", bg: "#fffbeb" },
-  { key: "budget", emoji: "🪙", label: "Budget", sub: "Cheap · Value", color: "#10b981", bg: "#ecfdf5" },
+{ key: "study", emoji: "📚", label: "Study", sub: "Wifi · Quiet", color: "#667eea", bg: "#e0e4ff" },
+  { key: "hangout", emoji: "🍔", label: "Hangout", sub: "Cozy · Casual", color: "#ec4899", bg: "#fce7f3" },
+  { key: "quick-bite", emoji: "🍕", label: "Quick Bite", sub: "Fast · Easy", color: "#f59e0b", bg: "#fef3c7" },
+  { key: "budget", emoji: "🪙", label: "Budget", sub: "Cheap · Value", color: "#10b981", bg: "#d1fae5" },
+    { key: "nightlife", emoji: "🎉", label: "Nightlife", sub: "Clubs · Music", color: "#ec4899", bg: "#fdf2f8" },
+  { key: "gaming", emoji: "🎮", label: "Gaming", sub: "Arcade · Fun", color: "#8b5cf6", bg: "#f5f3ff" },
+  { key: "fitness", emoji: "🏋️", label: "Fitness", sub: "Gym · Active", color: "#06b6d4", bg: "#ecfeff" },
+  { key: "rentals", emoji: "🚗", label: "Rentals", sub: "Bikes · Cars", color: "#84cc16", bg: "#f7fee7" },
 ];
 
 const CITIES = [
-  { key: "manipal", label: "📍 Manipal", lat: 13.3525, lon: 74.7934 },
-  { key: "mangaluru", label: "🌆 Mangaluru", lat: 12.9716, lon: 74.8631 },
+  { key: "manipal", label: "Manipal", lat: 13.3525, lon: 74.7934 },
+  { key: "mangalore", label: "Mangalore", lat: 12.9716, lon: 74.8631 },
+  { key: "bangalore", label: "Bangalore", lat: 12.9716, lon: 77.5946 },
+  { key: "mumbai", label: "Mumbai", lat: 19.0760, lon: 72.8777 },
+  { key: "delhi", label: "Delhi", lat: 28.7041, lon: 77.1025 },
+  { key: "hyderabad", label: "Hyderabad", lat: 17.3850, lon: 78.4867 },
+  { key: "pune", label: "Pune", lat: 18.5204, lon: 73.8567 },
+  { key: "chennai", label: "Chennai", lat: 13.0827, lon: 80.2707 },
 ];
+
 
 const RADIUS_OPTIONS = [1, 2, 3, 5, 10];
 const BUDGET_OPTIONS = [
@@ -185,8 +196,14 @@ const toggleFav = async (place) => {
     <div>
       <Navbar />
       <div className="header">
-        <h1>📍 MoodSpot</h1>
-        <p>Find the perfect place for your vibe</p>
+          <h1>Discover Spots Made for Right Now
+</h1>
+
+        <p>
+    Find cafes, restaurants and hangout spots
+    <br />
+    tailored to how you feel.
+  </p>
       
 
 </div>
@@ -349,48 +366,58 @@ const toggleFav = async (place) => {
         )}
 
         {/* Results */}
-        {displayPlaces.length > 0 && (
-          <>
-            <p className="results-header">
-              {activeTab === "favourites"
-                ? `⭐ ${displayPlaces.length} saved places`
-                : `🎯 ${displayPlaces.length} places found`}
-            </p>
-            {displayPlaces.map((place, i) => (
-              <div
-                className="place-card"
-                key={i}
-                style={{ animationDelay: `${i * 50}ms`, cursor: "pointer" }}
-                onClick={() => setSelectedPlace(place)}
+       {/* Results */}
+{displayPlaces.length > 0 && (
+  <>
+    <p className="results-header">
+      {activeTab === "favourites"
+        ? `⭐ ${displayPlaces.length} saved places`
+        : `🎯 ${displayPlaces.length} places found`}
+    </p>
+    <div className="results-grid">
+      {displayPlaces.map((place, i) => (
+        <div
+          className="place-card"
+          key={i}
+          style={{ animationDelay: `${i * 50}ms` }}
+          onClick={() => setSelectedPlace(place)}
+        >
+          <div className="place-img-wrap">
+            <img
+              src={place.thumbnail}
+              alt={place.title}
+              className="place-img"
+              onError={(e) => { e.target.src = "https://placehold.co/400x200?text=No+Image"; }}
+            />
+            <div className="place-img-overlay">
+              <span className="place-name-overlay">{place.title}</span>
+              {place.rating && <span className="rating-overlay">⭐ {place.rating}</span>}
+            </div>
+          </div>
+          <div className="place-info">
+            <div className="place-type">{place.type}</div>
+            <div className="place-address">📍 {place.address}</div>
+            <div className="place-meta">
+              {place.reviews && <span className="reviews">({place.reviews} reviews)</span>}
+              {place.open_state && (
+                <span className={`open-badge ${place.open_state.toLowerCase().includes("open") ? "open" : "closed"}`}>
+                  {place.open_state}
+                </span>
+              )}
+              {place.price && <span className="price-badge">{place.price}</span>}
+              <button
+                className="fav-btn"
+                onClick={(e) => { e.stopPropagation(); toggleFav(place); }}
               >
-                {place.thumbnail && (
-                  <img src={place.thumbnail} alt={place.title} className="place-img" />
-                )}
-                <div className="place-info">
-                  <div className="place-name">{place.title}</div>
-                  <div className="place-type">{place.type}</div>
-                  <div className="place-address">📍 {place.address}</div>
-                  <div className="place-meta">
-                    {place.rating && <span className="rating">⭐ {place.rating}</span>}
-                    {place.reviews && <span className="reviews">({place.reviews} reviews)</span>}
-                    {place.open_state && (
-                      <span className={`open-badge ${place.open_state.toLowerCase().includes("open") ? "open" : "closed"}`}>
-                        {place.open_state}
-                      </span>
-                    )}
-                    {place.price && <span className="price-badge">{place.price}</span>}
-                    <button
-                      className="fav-btn"
-                      onClick={(e) => { e.stopPropagation(); toggleFav(place); }}
-                    >
-                      {isFav(place) ? "❤️" : "🤍"}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </>
-        )}
+                {isFav(place) ? "❤️" : "🤍"}
+              </button>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </>
+)}
       </div>
 
       {/* Place Detail Modal */}
