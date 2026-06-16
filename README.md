@@ -96,7 +96,7 @@ mood-places/
 1. User signs up / logs in (JWT token stored in AsyncStorage on mobile, localStorage on web)
 2. User selects a mood on the dashboard
 3. App detects GPS location or uses selected city coordinates
-4. Frontend sends request to backend: `GET /api/places?mood=&lat=&lon=&radius=`
+4. Frontend sends request to backend
 5. Backend queries MongoDB (Place collection) filtered by mood tags and radius
 6. Results are displayed as cards with image, rating, open status, price
 7. User can save places to favourites — stored in MongoDB under their user profile
