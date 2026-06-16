@@ -110,6 +110,11 @@ const callPlace = (phone: string) => {
 };
 
 const openDirections = (lat: number, lon: number) => {
+  console.log("DIRECTIONS LAT/LON:", lat, lon);
+  if (!lat || !lon) {
+    Alert.alert("Location unavailable for this place");
+    return;
+  }
   const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`;
   Linking.openURL(url);
 };
