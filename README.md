@@ -140,7 +140,6 @@ npm start
 - 🧠 Smart recommendations based on past behaviour
 - 🎉 Expanded mood categories (movie theatres, beaches, hidden gems)
 - 🌐 Deploy backend to cloud (Railway / Render)
-- 📱 Publish mobile app to Google Play Store
 - 💡 Investment insights — identify high-demand areas and business opportunities
 
 ---
