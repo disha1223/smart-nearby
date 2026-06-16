@@ -28,6 +28,9 @@ const MOODS = [
   { key: "gaming", emoji: "🎮", label: "Gaming", sub: "Arcade · Fun", color: "#8b5cf6", bg: "#f5f3ff" },
   { key: "fitness", emoji: "🏋️", label: "Fitness", sub: "Gym · Active", color: "#06b6d4", bg: "#ecfeff" },
   { key: "rentals", emoji: "🚗", label: "Rentals", sub: "Bikes · Cars", color: "#84cc16", bg: "#f7fee7" },
+  { key: "hidden-gems", emoji: "💎", label: "Hidden Gems", sub: "Unique · Local", color: "#14b8a6", bg: "#ecfdf5" },
+  { key: "beaches", emoji: "🏖️", label: "Beaches", sub: "Sand · Sun", color: "#0ea5e9", bg: "#e0f2fe" },
+  { key: "movies", emoji: "🎬", label: "Movies", sub: "Theatres · Films", color: "#dc2626", bg: "#fee2e2" },
 ];
 
 export default function Dashboard() {
@@ -43,8 +46,8 @@ const [searchQuery, setSearchQuery] = useState("");
 
     try {
       setLoading(true);
-      const url = `${API_BASE}/api/places?mood=${mood}&lat=13.3525&lon=74.7934&radius=3`;
-      const res = await fetch(url);
+      const radius = mood === "beaches" ? 15 : 3;
+const url = `${API_BASE}/api/places?mood=${mood}&lat=13.3525&lon=74.7934&radius=${radius}`;      const res = await fetch(url);
       const data = await res.json();
       setPlaces(data.results || []);
     } catch (err) {

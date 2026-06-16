@@ -16,6 +16,9 @@ const MOOD_QUERIES = {
   gaming: "gaming cafes arcades near Manipal",
   fitness: "gyms fitness centers near Manipal",
   rentals: "bike car rental shops near Manipal",
+  "hidden-gems": "unique local hidden spots near Manipal",
+  beaches: "beaches near Manipal Udupi",
+  movies: "movie theatres cinemas near Manipal",
 };
 
 async function fetchPlacesForMood(mood, query) {
