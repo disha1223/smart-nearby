@@ -42,6 +42,9 @@ const handleLogin = async () => {
 
   return (
     <View style={styles.container}>
+        <TouchableOpacity style={styles.backButton} onPress={() => router.push("/(tabs)")}>
+      <Text style={styles.backButtonText}>← Home</Text>
+    </TouchableOpacity> 
       <Text style={styles.title}>Welcome Back</Text>
 
       <Text style={styles.subtitle}>
@@ -135,4 +138,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "500",
   },
+  backButton: {
+  alignSelf: "flex-start",
+  marginBottom: 20,
+},
+backButtonText: {
+  fontSize: 15,
+  fontWeight: "600",
+  color: "#888",
+},
 });

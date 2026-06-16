@@ -1,124 +1,52 @@
 const express = require("express");
-
 const router = express.Router();
-
 const User = require("../models/User");
-
 const jwt = require("jsonwebtoken");
 
-
-// AUTH MIDDLEWARE
+// Middleware to verify token and get user
 const auth = async (req, res, next) => {
-
   try {
-
-    const token =
-  req.headers.authorization.replace(
-    "Bearer ",
-    ""
-  );
-
-    if (!token) {
-
-      return res.status(401).json({
-        message: "No token",
-      });
-
-    }
-
-    const decoded = jwt.verify(
-
-      token,
-
-      process.env.JWT_SECRET
-
-    );
-
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) return res.status(401).json({ message: "No token" });
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.userId = decoded.id;
-
     next();
-
-  } catch (error) {
-
-    res.status(401).json({
-      message: "Invalid token",
-    });
-
+  } catch (err) {
+    res.status(401).json({ message: "Invalid token" });
   }
 };
 
-
-
-// ADD FAVOURITE
-router.post(
-  "/favourite",
-  auth,
-
-  async (req, res) => {
-
-    try {
-
-      const user = await User.findById(
-        req.userId
-      );
-
-      user.favourites.push(req.body);
-
-      await user.save();
-
-      res.json({
-        message: "Added to favourites",
-        favourites: user.favourites,
-      });
-
-    } catch (error) {
-
-      res.status(500).json({
-        message: error.message,
-      });
-
-    }
-  }
-);
-
-
-
-// GET FAVOURITES
-router.get(
-  "/favourites",
-  auth,
-
-  async (req, res) => {
-
-    try {
-
-      const user = await User.findById(
-        req.userId
-      );
-
-      res.json(user.favourites);
-
-    } catch (error) {
-
-      res.status(500).json({
-        message: error.message,
-      });
-
-    }
-  }
-);
-router.delete("/favourite", auth, async (req, res) => {
+// Toggle favorite
+router.post("/favourites", auth, async (req, res) => {
   try {
+    const { place } = req.body; // full place object
     const user = await User.findById(req.userId);
-    user.favourites = user.favourites.filter(
-      (f) => f.title !== req.body.title
+
+    const index = user.favourites.findIndex(
+      (f) => f.title === place.title && f.address === place.address
     );
+
+    if (index > -1) {
+      user.favourites.splice(index, 1);
+    } else {
+      user.favourites.push(place);
+    }
+
     await user.save();
-    res.json({ message: "Removed", favourites: user.favourites });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.json({ favourites: user.favourites });
+  } catch (err) {
+    res.status(500).json({ message: "Error updating favourites" });
   }
 });
 
+// Get favorites
+router.get("/favourites", auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+    res.json({ favourites: user.favourites });
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching favourites" });
+  }
+});
 
 module.exports = router;

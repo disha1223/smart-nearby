@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,7 +8,16 @@ import {
   ActivityIndicator,
   ScrollView,
   Image,
+  Alert,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { router } from "expo-router";
+import { useCallback } from "react";
+import { useFocusEffect } from "expo-router";
+import { Linking } from "react-native";
+
+const API_BASE = "http://192.168.1.12:5000"; // ← your laptop's IP
+
 
 const MOODS = [
   { key: "study", emoji: "📚", label: "Study", sub: "Wifi · Quiet", color: "#667eea", bg: "#e0e4ff" },
@@ -25,17 +34,18 @@ export default function Dashboard() {
   const [mood, setMood] = useState("");
   const [places, setPlaces] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [favourites, setFavourites] = useState<any[]>([]);
+const [activeTab, setActiveTab] = useState<"explore" | "favourites">("explore");
+const [searchQuery, setSearchQuery] = useState("");
 
   const searchPlaces = async () => {
     if (!mood) return;
 
     try {
       setLoading(true);
-const url = `http://10.0.2.2:5000/api/places?mood=${mood}&lat=13.3525&lon=74.7934&radius=3`;
+      const url = `${API_BASE}/api/places?mood=${mood}&lat=13.3525&lon=74.7934&radius=3`;
       const res = await fetch(url);
       const data = await res.json();
-      console.log("Got results:", data.results?.length, "for mood:", data.mood);
-
       setPlaces(data.results || []);
     } catch (err) {
       console.log(err);
@@ -43,155 +53,320 @@ const url = `http://10.0.2.2:5000/api/places?mood=${mood}&lat=13.3525&lon=74.793
       setLoading(false);
     }
   };
+  /*fav */
+useEffect(() => { loadFavourites(); }, []);
+
+useFocusEffect(
+  useCallback(() => { loadFavourites(); }, [])
+);
+const loadFavourites = async () => {
+  try {
+    const token = await AsyncStorage.getItem("token");
+    if (!token) return;
+    const res = await fetch(`${API_BASE}/api/user/favourites`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+    if (Array.isArray(data)) setFavourites(data);
+    else if (Array.isArray(data.favourites)) setFavourites(data.favourites);
+  } catch (err) { console.log(err); }
+};
+
+const isFav = (place: any) => favourites.some((f) => f.title === place.title);
+
+const toggleFavorite = async (place: any) => {
+  try {
+    const token = await AsyncStorage.getItem("token");
+    if (!token) return;
+
+    // Update local state immediately
+    if (isFav(place)) {
+      setFavourites((prev) => prev.filter((f) => f.title !== place.title));
+    } else {
+      setFavourites((prev) => [...prev, place]);
+    }
+
+    // Server uses ONE POST endpoint that toggles automatically
+    await fetch(`${API_BASE}/api/user/favourites`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ place }),  // ← server expects { place: {...} }
+    });
+
+  } catch (err) { console.log(err); }
+};
+const callPlace = (phone: string) => {
+  if (!phone) {
+    Alert.alert("No phone number available");
+    return;
+  }
+  Linking.openURL(`tel:${phone}`);
+};
+
+const openDirections = (lat: number, lon: number) => {
+  const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`;
+  Linking.openURL(url);
+};
+
+  const handleLogout = async () => {
+    Alert.alert("Logout", "Are you sure you want to logout?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Logout",
+        style: "destructive",
+        onPress: async () => {
+          await AsyncStorage.removeItem("token");
+          await AsyncStorage.removeItem("username");
+          router.replace("/(tabs)");
+        },
+      },
+    ]);
+  };
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <View style={styles.hero}>
-        <Text style={styles.heroTitle}>Discover Spots Made For Right Now</Text>
-        <Text style={styles.heroSubtitle}>
-          Find cafes, restaurants and hangout spots tailored to how you feel.
-        </Text>
-      </View>
+    <View style={styles.wrapper}>
+      {/* Header */}
+      {/* Header */}
+<View style={styles.header}>
+  <Text style={styles.logo}>📍 Smart Nearby</Text>
+  <TouchableOpacity onPress={handleLogout} style={styles.logoutBtn}>
+    <Text style={styles.logoutText}>Logout</Text>
+  </TouchableOpacity>
+</View>
 
-      <View style={styles.moodContainer}>
-        {MOODS.map((m) => (
-          <TouchableOpacity
-            key={m.key}
-            onPress={() => setMood(m.key)}
-            style={[
-              styles.moodCard,
-              {
-                backgroundColor: m.bg,
-                borderColor: mood === m.key ? m.color : "transparent",
-              },
-            ]}
-          >
-            <Text style={styles.emoji}>{m.emoji}</Text>
-            <Text style={styles.moodTitle}>{m.label}</Text>
-            <Text style={styles.moodSub}>{m.sub}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+{/* Tabs below header */}
+<View style={styles.tabs}>
+  <TouchableOpacity
+    style={[styles.tab, activeTab === "explore" && styles.tabActive]}
+    onPress={() => setActiveTab("explore")}
+  >
+    <Text style={[styles.tabText, activeTab === "explore" && styles.tabTextActive]}>
+      🔍 Explore
+    </Text>
+  </TouchableOpacity>
+  <TouchableOpacity
+    style={[styles.tab, activeTab === "favourites" && styles.tabActive]}
+    onPress={() => { setActiveTab("favourites"); loadFavourites(); }}
+  >
+    <Text style={[styles.tabText, activeTab === "favourites" && styles.tabTextActive]}>
+      ❤️ Favourites ({favourites.length})
+    </Text>
+  </TouchableOpacity>
+</View>
 
-      <TouchableOpacity style={styles.searchBtn} onPress={searchPlaces}>
-        <Text style={styles.searchText}>Find Places</Text>
-      </TouchableOpacity>
+       
 
-      {loading && <ActivityIndicator size="large" style={{ marginBottom: 20 }} />}
-
-      <FlatList
-  data={places}
-  keyExtractor={(_, index) => index.toString()}
-  scrollEnabled={false}
-  renderItem={({ item }) => (
-    <View style={styles.card}>
-      {item.image ? (
-        <Image source={{ uri: item.image }} style={styles.cardImage} />
-      ) : (
-        <View style={[styles.cardImage, styles.cardImagePlaceholder]} />
-      )}
-      <View style={styles.cardContent}>
-        <Text style={styles.placeName}>{item.title}</Text>
-        <Text style={styles.placeType}>{item.type}</Text>
-        <Text style={styles.placeAddress}>{item.address}</Text>
-        <View style={styles.metaRow}>
-          {item.rating > 0 && (
-            <Text style={styles.rating}>⭐ {item.rating} ({item.reviews})</Text>
-          )}
-          {item.price_level && (
-            <Text style={styles.price}>{item.price_level}</Text>
-          )}
-          {item.open_now !== undefined && (
-            <Text style={item.open_now ? styles.openNow : styles.closedNow}>
-              {item.open_now ? "Open" : "Closed"}
-            </Text>
-          )}
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+          {activeTab === "explore" && <>
+        <View style={styles.hero}>
+          <Text style={styles.heroTitle}>Discover Spots Made For Right Now</Text>
+          <Text style={styles.heroSubtitle}>
+            Find cafes, restaurants and hangout spots tailored to how you feel.
+          </Text>
         </View>
-      </View>
+
+        <View style={styles.moodContainer}>
+          {MOODS.map((m) => (
+            <TouchableOpacity
+              key={m.key}
+              onPress={() => setMood(m.key)}
+              style={[
+                styles.moodCard,
+                {
+                  backgroundColor: m.bg,
+                  borderColor: mood === m.key ? m.color : "transparent",
+                },
+              ]}
+            >
+              <Text style={styles.emoji}>{m.emoji}</Text>
+              <Text style={styles.moodTitle}>{m.label}</Text>
+              <Text style={styles.moodSub}>{m.sub}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <TouchableOpacity style={styles.searchBtn} onPress={searchPlaces}>
+          <Text style={styles.searchText}>Find Places</Text>
+        </TouchableOpacity>
+
+        {loading && <ActivityIndicator size="large" style={{ marginBottom: 20 }} />}
+
+        <FlatList
+          data={places}
+          keyExtractor={(_, index) => index.toString()}
+          scrollEnabled={false}
+          renderItem={({ item }) => (
+            <View style={styles.card}>
+              {item.image ? (
+                <Image source={{ uri: item.image }} style={styles.cardImage} />
+              ) : (
+                <View style={[styles.cardImage, styles.cardImagePlaceholder]} />
+              )}
+              <View style={styles.cardContent}>
+
+                <Text style={styles.placeName}>{item.title}</Text>
+                <Text style={styles.placeType}>{item.type}</Text>
+                <Text style={styles.placeAddress}>{item.address}</Text>
+                <View style={styles.metaRow}>
+                  {item.rating > 0 && (
+                    <Text style={styles.rating}>⭐ {item.rating} ({item.reviews})</Text>
+                  )}
+                  {item.price_level && (
+                    <Text style={styles.price}>{item.price_level}</Text>
+                  )}
+                  {item.open_now !== undefined && (
+                    <Text style={item.open_now ? styles.openNow : styles.closedNow}>
+                      {item.open_now ? "Open" : "Closed"}
+                    </Text>
+                  )}
+                  <View style={styles.actionRow}>
+              <TouchableOpacity style={styles.actionBtn} onPress={() => callPlace(item.phone)}>
+                <Text style={styles.actionBtnText}>📞 Call</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.actionBtn}
+                onPress={() => openDirections(item.lat, item.lon)}
+              >
+                <Text style={styles.actionBtnText}>🧭 Directions</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.actionBtn} onPress={() => toggleFavorite(item)}>
+    <Text style={styles.actionBtnText}>{isFav(item) ? "❤️ Saved" : "🤍 Save"}</Text>
+  </TouchableOpacity>
+
+            <TouchableOpacity style={styles.actionBtn} onPress={() => toggleFavorite(item)}>
+  <Text style={styles.actionBtnText}>{isFav(item) ? "❤️ Saved" : "🤍 Save"}</Text>
+</TouchableOpacity>
+            </View>
+                </View>
+                
+              </View>
+              
+            </View>
+            
+          )}
+        />
+        </>}
+
+          {activeTab === "favourites" && (
+            <>
+              <Text style={{ fontSize: 20, fontWeight: "700", marginBottom: 16 }}>Saved Places</Text>
+              {favourites.length === 0 && (
+                <Text style={{ textAlign: "center", color: "#999", marginTop: 40 }}>
+                  No favourites yet — start exploring!
+                </Text>
+              )}
+              <FlatList
+                data={favourites}
+                keyExtractor={(_, i) => i.toString()}
+                scrollEnabled={false}
+                renderItem={({ item }) => (
+                  <View style={styles.card}>
+                    {item.thumbnail ? (
+                      <Image source={{ uri: item.thumbnail }} style={styles.cardImage} />
+                    ) : (
+                      <View style={[styles.cardImage, styles.cardImagePlaceholder]} />
+                    )}
+                    <View style={styles.cardContent}>
+                      <Text style={styles.placeName}>{item.title}</Text>
+                      <Text style={styles.placeType}>{item.type}</Text>
+                      <Text style={styles.placeAddress}>{item.address}</Text>
+                      <View style={styles.actionRow}>
+                        <TouchableOpacity style={styles.actionBtn} onPress={() => callPlace(item.phone)}>
+                          <Text style={styles.actionBtnText}>📞 Call</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.actionBtn} onPress={() => openDirections(item.lat, item.lon)}>
+                          <Text style={styles.actionBtnText}>🧭 Directions</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.actionBtn} onPress={() => toggleFavorite(item)}>
+                          <Text style={styles.actionBtnText}>❤️ Remove</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  </View>
+                )}
+              />
+            </>
+          )}
+      </ScrollView>
     </View>
-  )}
-/>
-    </ScrollView>
+    
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#fafafa" },
-  heading: { fontSize: 24, fontWeight: "bold", marginBottom: 20 },
+  wrapper: { flex: 1, backgroundColor: "#fafafa" },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 24,
+    paddingTop: 50,
+    paddingBottom: 16,
+    backgroundColor: "#ffffff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+  },
+  logo: { fontSize: 20, fontWeight: "800", color: "#111" },
+  logoutText: { fontSize: 14, fontWeight: "700", color: "#ef4444" },
+  container: { flex: 1, padding: 20 },
+  hero: { marginBottom: 25 },
+  heroTitle: { fontSize: 32, fontWeight: "700", marginBottom: 10 },
+  heroSubtitle: { fontSize: 16, color: "#6b7280", lineHeight: 24 },
   moodContainer: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
-  moodBtn: { padding: 10, borderWidth: 1, borderRadius: 10 },
-  selectedMood: { backgroundColor: "#ddd" },
+  moodCard: { width: "48%", padding: 16, borderRadius: 20, borderWidth: 2, marginBottom: 12 },
+  emoji: { fontSize: 30, marginBottom: 10 },
+  moodTitle: { fontSize: 17, fontWeight: "700" },
+  moodSub: { color: "#6b7280", marginTop: 4 },
   searchBtn: {
-    backgroundColor: "#111827",
+    backgroundColor: "#f59e0b",
     padding: 18,
     borderRadius: 18,
     marginTop: 20,
     marginBottom: 25,
   },
-  searchText: { color: "white", textAlign: "center" },
-  hero: { marginBottom: 25 },
-  heroTitle: { fontSize: 32, fontWeight: "700", marginBottom: 10 },
-  heroSubtitle: { fontSize: 16, color: "#6b7280", lineHeight: 24 },
-  moodCard: { width: "48%", padding: 16, borderRadius: 20, borderWidth: 2, marginBottom: 12 },
-  emoji: { fontSize: 30, marginBottom: 10 },
-  moodTitle: { fontSize: 17, fontWeight: "700" },
-  moodSub: { color: "#6b7280", marginTop: 4 },
+  searchText: { color: "white", textAlign: "center", fontWeight: "700" },
   card: {
-  borderWidth: 1,
-  borderColor: "#eee",
-  marginBottom: 14,
-  borderRadius: 14,
-  overflow: "hidden",
-  backgroundColor: "#fff",
-},
-cardImage: {
-  width: "100%",
-  height: 150,
-  backgroundColor: "#eee",
-},
-cardImagePlaceholder: {
-  justifyContent: "center",
-  alignItems: "center",
-},
-cardContent: {
-  padding: 14,
-},
-placeName: {
-  fontWeight: "bold",
-  fontSize: 17,
-  marginBottom: 4,
-},
-placeType: {
-  color: "#6b7280",
-  marginBottom: 2,
-},
-placeAddress: {
-  color: "#6b7280",
-  fontSize: 13,
-  marginBottom: 8,
-},
-metaRow: {
+    borderWidth: 1,
+    borderColor: "#eee",
+    marginBottom: 14,
+    borderRadius: 14,
+    overflow: "hidden",
+    backgroundColor: "#fff",
+  },
+  cardImage: { width: "100%", height: 150, backgroundColor: "#eee" },
+  cardImagePlaceholder: { justifyContent: "center", alignItems: "center" },
+  cardContent: { padding: 14 },
+  placeName: { fontWeight: "bold", fontSize: 17, marginBottom: 4 },
+  placeType: { color: "#6b7280", marginBottom: 2 },
+  placeAddress: { color: "#6b7280", fontSize: 13, marginBottom: 8 },
+  metaRow: { flexDirection: "row", gap: 10, alignItems: "center" },
+  rating: { fontSize: 13, fontWeight: "600" },
+  price: { fontSize: 13, color: "#10b981", fontWeight: "600" },
+  openNow: { fontSize: 13, color: "#10b981", fontWeight: "600" },
+  closedNow: { fontSize: 13, color: "#ef4444", fontWeight: "600" },
+  actionRow: {
   flexDirection: "row",
-  gap: 10,
+  gap: 6,
+  marginTop: 12,
+},
+actionBtn: {
+  flex: 1,
+  backgroundColor: "#f5f5f5",
+  borderRadius: 10,
+  paddingVertical: 8,
   alignItems: "center",
 },
-rating: {
-  fontSize: 13,
-  fontWeight: "600",
+actionBtnText: {
+  fontSize: 11,
+  fontWeight: "700",
+  color: "#111",
 },
-price: {
-  fontSize: 13,
-  color: "#10b981",
-  fontWeight: "600",
-},
-openNow: {
-  fontSize: 13,
-  color: "#10b981",
-  fontWeight: "600",
-},
-closedNow: {
-  fontSize: 13,
-  color: "#ef4444",
-  fontWeight: "600",
-},
+tabs: { flexDirection: "row", backgroundColor: "#fff", borderBottomWidth: 1, borderBottomColor: "#f0f0f0" },
+tab: { flex: 1, paddingVertical: 14, alignItems: "center" },
+tabActive: { borderBottomWidth: 2, borderBottomColor: "#667eea" },
+tabText: { fontSize: 14, fontWeight: "600", color: "#999" },
+tabTextActive: { color: "#667eea" },
 });

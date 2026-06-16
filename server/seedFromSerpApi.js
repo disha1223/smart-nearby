@@ -42,6 +42,8 @@ async function fetchPlacesForMood(mood, query) {
     price_level: r.price || "",
     open_now: r.operating_hours?.open_now ?? true,
     image: r.thumbnail || "",
+    phone: r.phone || "",
+
     mood_tags: [mood],
     city: "manipal",
   }));

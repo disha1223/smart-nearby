@@ -11,6 +11,7 @@ const placeSchema = new mongoose.Schema({
   price_level: String,
   open_now: Boolean,
   image: String,
+  phone: String,
   mood_tags: [String],
   city: String,
 }, { timestamps: true });
