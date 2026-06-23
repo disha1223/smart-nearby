@@ -57,8 +57,6 @@ function Signup() {
       );
 
 
-      alert("Signup Successful 😭🔥");
-
       navigate("/login");
 
     } catch (error) {
@@ -79,7 +77,7 @@ function Signup() {
       >
 
         <h1>Create Account</h1>
-<p>Join AVORA and discover places that match your mood</p>
+<p>Join Smart Nearby and discover places that match your mood</p>
 
 
         <input

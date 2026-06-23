@@ -12,7 +12,7 @@ function Navbar() {
     <nav className="navbar">
 
       <h1 className="logo">
-        AVORA 
+        Smart Nearby 
       </h1>
 
       <div className="nav-links">
