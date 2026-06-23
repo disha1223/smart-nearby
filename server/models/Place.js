@@ -10,6 +10,7 @@ const placeSchema = new mongoose.Schema({
   reviews: Number,
   price_level: String,
   open_now: Boolean,
+  hours: { type: Map, of: String, default: {} }, // ✅ NEW
   image: String,
   phone: String,
   mood_tags: [String],

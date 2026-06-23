@@ -27,12 +27,23 @@ router.get("/", async (req, res) => {
 
     let results = await Place.find(filter).lean();
 
-    results = results
-      .map((p) => ({
-        ...p,
-        distance: getDistanceKm(parseFloat(lat), parseFloat(lon), p.lat, p.lon),
-      }))
-      .filter((p) => p.distance <= Number(radius));
+results = results
+  .map((p) => {
+    // ✅ Safely convert Mongoose Map to plain object
+    let hours = {};
+    if (p.hours instanceof Map) {
+      hours = Object.fromEntries(p.hours);
+    } else if (p.hours && typeof p.hours === "object") {
+      hours = p.hours;
+    }
+
+    return {
+      ...p,
+      hours,
+      distance: getDistanceKm(parseFloat(lat), parseFloat(lon), p.lat, p.lon),
+    };
+  })
+  .filter((p) => p.distance <= Number(radius));
 
     res.json({ mood, results, total: results.length });
   } catch (err) {
