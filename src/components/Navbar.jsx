@@ -11,9 +11,9 @@ function Navbar() {
 
     <nav className="navbar">
 
-      <h1 className="logo">
+<Link to="/" className="logo">
         Smart Nearby 
-      </h1>
+      </Link>
 
       <div className="nav-links">
 
