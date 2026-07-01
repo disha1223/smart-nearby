@@ -1,263 +1,174 @@
-import { Link } from "react-router-dom";
-import { useEffect, useRef } from "react";
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { MapPin, Search, SlidersHorizontal, Compass, Star, ArrowRight, UtensilsCrossed, Coffee } from "lucide-react";
 import "./landingpage.css";
 
-const MOODS = [
-  { emoji: "📚", label: "Study",       sub: "Wifi · Quiet",      color: "purple" },
-  { emoji: "🍔", label: "Hangout",     sub: "Cozy · Casual",     color: "pink"   },
-  { emoji: "🍕", label: "Quick Bite",  sub: "Fast · Easy",       color: "amber"  },
-  { emoji: "🪙", label: "Budget",      sub: "Cheap · Value",     color: "green"  },
-  { emoji: "🎉", label: "Nightlife",   sub: "Clubs · Music",     color: "pink"   },
-  { emoji: "🎮", label: "Gaming",      sub: "Arcade · Fun",      color: "violet" },
-  { emoji: "🏋️", label: "Fitness",    sub: "Gym · Active",      color: "cyan"   },
-  { emoji: "🚗", label: "Rentals",     sub: "Bikes · Cars",      color: "lime"   },
-  { emoji: "💎", label: "Hidden Gems", sub: "Unique · Local",    color: "teal"   },
-  { emoji: "🏖️", label: "Beaches",    sub: "Sand · Sun",        color: "sky"    },
-  { emoji: "🎬", label: "Movies",      sub: "Theatres · Films",  color: "red"    },
-  { emoji: "☕", label: "Cafes",       sub: "Coffee · Chill",    color: "blue"   },
+const FLOATING_PLACES = [
+  { name: "Ando Omakase", meta: "0.9 mi · Sushi", top: "6%", left: "4%", icon: "sushi" },
+  { name: "Fern & Fig", meta: "0.6 mi · Brunch", bottom: "8%", right: "4%", icon: "brunch" },
 ];
 
-const TESTIMONIALS = [
-  { quote: "I used to spend forever scrolling trying to find a quiet cafe to study. Now I just pick Study and I'm there in five minutes.", author: "— Disha, Manipal", cls: "t-purple" },
-  { quote: "Found the best rooftop bar for our friend's birthday in minutes. The nightlife filter is a lifesaver on weekends.", author: "— Aroha, Udupi", cls: "t-pink" },
-  { quote: "Ratings and 'open now' status saved me from showing up to a closed gym twice. Such a small thing but so useful.", author: "— Rohan, Manipal", cls: "t-green" },
-  { quote: "As a student, the budget filter helps me find good food without blowing my monthly allowance. Genuinely use it every week.", author: "— Rashmi, MIT Manipal", cls: "t-amber" },
+const PIN_POSITIONS = [
+  { top: "16%", left: "24%", delay: "0s" }, { top: "24%", left: "50%", delay: "0.15s" },
+  { top: "12%", left: "64%", delay: "0.3s" }, { top: "34%", left: "14%", delay: "0.45s" },
+  { top: "40%", left: "40%", delay: "0.6s" }, { top: "28%", left: "72%", delay: "0.2s" },
+  { top: "52%", left: "28%", delay: "0.5s" }, { top: "48%", left: "58%", delay: "0.35s" },
+  { top: "62%", left: "46%", delay: "0.1s" }, { top: "68%", left: "20%", delay: "0.55s" },
+  { top: "72%", left: "64%", delay: "0.4s" }, { top: "80%", left: "38%", delay: "0.25s" },
 ];
 
-export default function LandingPage() {
-  const revealRefs = useRef([]);
+const BUILDINGS = [
+  { top: "10%", left: "10%", w: 34, h: 22, r: -8 },  { top: "8%", left: "40%", w: 46, h: 30, r: 4 },
+  { top: "20%", left: "58%", w: 30, h: 44, r: -3 },   { top: "38%", left: "20%", w: 40, h: 26, r: 6 },
+  { top: "30%", left: "78%", w: 28, h: 36, r: -6 },   { top: "50%", left: "42%", w: 52, h: 28, r: 2 },
+  { top: "58%", left: "10%", w: 30, h: 40, r: -4 },   { top: "62%", left: "68%", w: 38, h: 24, r: 5 },
+  { top: "74%", left: "30%", w: 44, h: 30, r: -2 },   { top: "78%", left: "56%", w: 26, h: 38, r: 7 },
+  { top: "18%", left: "26%", w: 24, h: 18, r: 3 },    { top: "44%", left: "64%", w: 32, h: 22, r: -5 },
+];
 
-  useEffect(() => {
-    const io = new IntersectionObserver(
-      (entries) => entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("visible"); io.unobserve(e.target); } }),
-      { threshold: 0.12 }
-    );
-    revealRefs.current.forEach((el) => el && io.observe(el));
-    return () => io.disconnect();
-  }, []);
+function LandingPage() {
+  const navigate = useNavigate();
+  const [query, setQuery] = useState("");
+  const username = localStorage.getItem("username");
 
-  const r = (delay = 0) => (el) => {
-    if (el && !revealRefs.current.includes(el)) revealRefs.current.push(el);
-    if (el) el.style.transitionDelay = `${delay}s`;
+  const handleDiscover = () => {
+    navigate("/dashboard");
   };
 
   return (
-    <div className="lp-root">
+    <div className="landing2">
+      <nav className="landing2-nav">
+        <div className="landing2-logo">
+          <span className="logo-badge"><Compass size={18} /></span>
+          <span>
+            Smart <em>Nearby</em>
+          </span>
+        </div>
 
-      {/* ── NAV ── */}
-      <nav className="lp-nav">
-        <Link to="/" className="lp-logo">
-          <span className="lp-dot" /> Smart Nearby
-        </Link>
-        <div className="lp-nav-links">
-          <a href="#moods">Moods</a>
-          <a href="#how">How it works</a>
-          <a href="#features">Features</a>
-          <Link to="/signup" className="lp-nav-cta">Get Started</Link>
+        <div className="landing2-links">
+          <Link to="/dashboard">Discover</Link>
+          <Link to="/dashboard">Restaurants</Link>
+          <Link to="/dashboard">Experiences</Link>
+          <Link to="/dashboard">Lists</Link>
+        </div>
+
+        <div className="landing2-actions">
+          {username ? (
+            <Link to="/dashboard" className="signin-btn">{username}</Link>
+          ) : (
+            <Link to="/login" className="signin-btn">Sign in</Link>
+          )}
         </div>
       </nav>
 
-      {/* ── HERO ── */}
-      <section className="lp-hero">
-        <div className="lp-hero-floats" aria-hidden="true">
-          <div className="lp-float-card fc1"><span>📚</span><div><strong>Study Spot found</strong><br /><small>0.4 km · Open now</small></div></div>
-          <div className="lp-float-card fc2"><span>🎉</span><div><strong>Nightlife vibes</strong><br /><small>12 places nearby</small></div></div>
-          <div className="lp-float-card fc3"><span>⭐</span><div><strong>4.8 · Cafe Mocha</strong><br /><small>Budget-friendly</small></div></div>
-          <div className="lp-float-card fc4"><span>📍</span><div><strong>GPS detected</strong><br /><small>Manipal, KA</small></div></div>
+      <section className="landing2-hero">
+        <div className="hero-copy">
+          <div className="live-badge">
+            <span className="live-dot" />
+            287 places open near you right now
+          </div>
+
+          <h1 className="hero-heading">
+            Find places that
+            <br />
+            match your <em>mood</em>.
+          </h1>
+
+          <p className="hero-sub">
+            A calmer way to discover restaurants, cafes and small corners of
+            the city — curated by mood, distance and taste. No endless
+            scrolling.
+          </p>
+
+          <div className="hero-search">
+            <Search size={18} className="search-icon" />
+            <input
+              type="text"
+              placeholder="Ramen, rooftop bar, quiet cafe..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleDiscover()}
+            />
+            <span className="search-or">or</span>
+            <button className="filters-btn" onClick={handleDiscover}>
+              <SlidersHorizontal size={15} />
+              Filters
+            </button>
+            <button className="discover-btn" onClick={handleDiscover}>
+              Discover <ArrowRight size={16} />
+            </button>
+          </div>
+
+          <div className="hero-stats">
+            <div>
+              <strong>12k+</strong>
+              <span>curated spots</span>
+            </div>
+            <div className="stat-divider" />
+            <div>
+              <strong>4.8</strong>
+              <span>avg. rating</span>
+            </div>
+            <div className="stat-divider" />
+            <div>
+              <strong>87</strong>
+              <span>neighborhoods</span>
+            </div>
+          </div>
         </div>
 
-        <div className="lp-hero-badge">✨ Discover places that match your mood</div>
-        <h1 className="lp-hero-title">Find the right place,<br />for how you feel right now.</h1>
-        <p className="lp-hero-sub">From quiet cafes to buzzing nightlife — Smart Nearby discovers spots near you that precisely match your mood, budget, and schedule.</p>
-        <div className="lp-hero-actions">
-          <Link to="/signup" className="lp-btn-primary">Start Exploring Free →</Link>
-          <a href="#how" className="lp-btn-secondary">See how it works</a>
-        </div>
-      </section>
+        <div className="hero-map">
+          <div className="map-canvas">
+            <div className="map-glow map-glow-1" />
+            <div className="map-glow map-glow-2" />
 
-      {/* ── MOODS ── */}
-      <section id="moods" className="lp-moods-section">
-        <div className="lp-inner">
-          <p className="lp-label reveal" ref={r(0)}>Pick a Mood</p>
-          <h2 className="lp-section-title reveal" ref={r(0.1)}>Every mood gets its own shortcut.</h2>
-          <p className="lp-section-sub reveal" ref={r(0.2)}>Tap what you're in the mood for and we'll surface places built for exactly that feeling.</p>
+            {BUILDINGS.map((b, i) => (
+              <div
+                key={i}
+                className="map-building"
+                style={{
+                  top: b.top,
+                  left: b.left,
+                  width: `${b.w}px`,
+                  height: `${b.h}px`,
+                  transform: `rotate(${b.r}deg)`,
+                }}
+              />
+            ))}
 
-          <div className="lp-mood-grid">
-            {MOODS.map((m, i) => (
-              <div key={m.label} className={`lp-mood-chip mc-${m.color} reveal`} ref={r(i * 0.04)}>
-                <span className="mc-emoji">{m.emoji}</span>
-                <span className="mc-label">{m.label}</span>
-                <span className="mc-sub">{m.sub}</span>
+            {PIN_POSITIONS.map((pos, i) => (
+              <div key={i} className="map-pin-wrap" style={{ top: pos.top, left: pos.left, animationDelay: pos.delay }}>
+                <span className="map-pin-pulse" />
+                <MapPin size={22} className="map-pin" />
               </div>
             ))}
           </div>
-        </div>
-      </section>
 
-      {/* ── STATS ── */}
-      <div className="lp-stats">
-        {[
-          { num: "11+", label: "Mood Categories" },
-          { num: "6+",  label: "Cities covered" },
-          { num: "5km", label: "Max search radius" },
-          { num: "Real", label: "Time ratings & hours" },
-        ].map((s, i) => (
-          <div key={s.label} className="lp-stat reveal" ref={r(i * 0.1)}>
-            <div className="lp-stat-num">{s.num}</div>
-            <div className="lp-stat-label">{s.label}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* ── HOW IT WORKS ── */}
-      <section id="how" className="lp-how">
-        <div className="lp-inner">
-          <p className="lp-label lp-label-amber reveal" ref={r(0)}>How it works</p>
-          <h2 className="lp-section-title lp-title-white reveal" ref={r(0.1)}>Less searching, more doing.</h2>
-          <p className="lp-section-sub lp-sub-muted reveal" ref={r(0.2)}>Three steps and you're out the door.</p>
-
-          <div className="lp-steps">
-            {[
-              { num: "01", icon: "🎯", bg: "#1e1f3a", title: "Pick your mood", text: "Tell us what you're in the mood for — study session, quick bite, nightlife, gym, or anything else. We filter out everything that doesn't fit." },
-              { num: "02", icon: "📍", bg: "#2d2410", title: "We find what's nearby", text: "Your GPS or a city you choose. Real places, real ratings, real open-now status — sorted by relevance, not ads." },
-              { num: "03", icon: "⭐", bg: "#0d2a1e", title: "Go, save, repeat", text: "Navigate with one tap. Save favourites to revisit later. Call ahead. Your history and saved spots stick around across sessions." },
-            ].map((step, i) => (
-              <div key={step.num} className="lp-step reveal" ref={r(i * 0.15)}>
-                <span className="lp-step-num">{step.num}</span>
-                <div className="lp-step-icon" style={{ background: step.bg }}>{step.icon}</div>
-                <h3>{step.title}</h3>
-                <p>{step.text}</p>
+          {FLOATING_PLACES.map((p) => (
+            <div className="place-float-card" key={p.name} style={p}>
+              <div className="place-float-thumb">
+                {p.icon === "sushi" ? <UtensilsCrossed size={18} /> : <Coffee size={18} />}
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── FEATURES ── */}
-      <section id="features" className="lp-features">
-        <div className="lp-inner">
-          <p className="lp-label reveal" ref={r(0)}>Features</p>
-          <h2 className="lp-section-title reveal" ref={r(0.1)}>Built for how you actually explore.</h2>
-          <p className="lp-section-sub reveal" ref={r(0.2)}>Every feature started as a real frustration.</p>
-
-          <div className="lp-feat-grid">
-            <div className="lp-feat-card lp-feat-wide reveal" ref={r(0)}>
               <div>
-                <div className="lp-feat-icon" style={{ background: "#e0e4ff" }}>🎯</div>
-                <h3>Mood-based discovery</h3>
-                <p>Not just keyword search. Pick a mood and we surface places filtered by type, vibe, price, and what's actually open — so you only see options worth considering.</p>
-                <span className="lp-feat-tag">11 moods &amp; counting</span>
+                <p className="place-float-name">{p.name}</p>
+                <p className="place-float-meta">
+                  <Star size={12} fill="currentColor" /> {p.meta}
+                </p>
               </div>
-              <div className="lp-feat-visual lp-fv-purple">🎯</div>
             </div>
-
-            <div className="lp-feat-card lp-feat-amber reveal" ref={r(0.1)}>
-              <div className="lp-feat-icon" style={{ background: "#fde68a" }}>📍</div>
-              <h3>GPS location detection</h3>
-              <p>Finds places from where you actually are — or toggle between Manipal, Mangalore, Bangalore, Mumbai, and more.</p>
-              <span className="lp-feat-tag lp-tag-amber">Instant &amp; accurate</span>
-            </div>
-
-            <div className="lp-feat-card lp-feat-green reveal" ref={r(0.2)}>
-              <div className="lp-feat-icon" style={{ background: "#a7f3d0" }}>⭐</div>
-              <h3>Ratings, hours &amp; prices</h3>
-              <p>Know before you go. See Google ratings, open-now status, price level, address, and photos — right in the results list.</p>
-              <span className="lp-feat-tag lp-tag-green">No more surprises</span>
-            </div>
-
-            <div className="lp-feat-card lp-feat-pink reveal" ref={r(0.1)}>
-              <div className="lp-feat-icon" style={{ background: "#fbcfe8" }}>❤️</div>
-              <h3>Favourites that stick</h3>
-              <p>Bookmark places you love — saved to your account in MongoDB so they follow you across devices and sessions.</p>
-              <span className="lp-feat-tag lp-tag-pink">Persists across sessions</span>
-            </div>
-
-            <div className="lp-feat-card lp-feat-violet reveal" ref={r(0.2)}>
-              <div className="lp-feat-icon" style={{ background: "#ddd6fe" }}>🔐</div>
-              <h3>Secure JWT login</h3>
-              <p>Sign up and your favourites, history, and preferences are tied to your account — protected with JWT and bcrypt.</p>
-              <span className="lp-feat-tag lp-tag-violet">Auth you can trust</span>
-            </div>
-
-            <div className="lp-feat-card lp-feat-wide reveal" ref={r(0)}>
-              <div>
-                <div className="lp-feat-icon" style={{ background: "#a5f3fc" }}>📞</div>
-                <h3>One-tap call &amp; navigate</h3>
-                <p>Call a place directly from the app. Open directions in Google Maps with one tap. No switching between apps.</p>
-                <span className="lp-feat-tag lp-tag-cyan">Tap to go</span>
-              </div>
-              <div className="lp-feat-visual lp-fv-cyan">🗺️</div>
-            </div>
-          </div>
+          ))}
         </div>
       </section>
 
-      {/* ── TESTIMONIALS ── */}
-      <section className="lp-social">
-        <div className="lp-inner">
-          <p className="lp-label lp-label-amber reveal" ref={r(0)}>What people say</p>
-          <h2 className="lp-section-title lp-title-white reveal" ref={r(0.1)}>Loved by people on the go.</h2>
-          <p className="lp-section-sub lp-sub-muted reveal" ref={r(0.2)}>Students and explorers across Manipal, Udupi, and beyond.</p>
-          <div className="lp-testimonials">
-            {TESTIMONIALS.map((t, i) => (
-              <div key={i} className={`lp-tcard ${t.cls} reveal`} ref={r(i * 0.1)}>
-                <div className="lp-quote-mark">"</div>
-                <p className="lp-quote">{t.quote}</p>
-                <p className="lp-author">{t.author}</p>
-              </div>
-            ))}
-          </div>
-        </div>
+      <section className="landing2-cta">
+        <h2>Ready to find your next favourite spot?</h2>
+        <p>Sign up free and start exploring places that match how you feel.</p>
+        <Link to="/signup" className="cta-btn">
+          Get started <ArrowRight size={16} />
+        </Link>
       </section>
-
-      {/* ── CTA ── */}
-      <section className="lp-cta">
-        <h2 className="reveal" ref={r(0)}>Ready to find your spot?</h2>
-        <p className="reveal" ref={r(0.1)}>Join Smart Nearby and start exploring places made for how you feel — free, fast, and always nearby.</p>
-        <div className="lp-cta-btns reveal" ref={r(0.2)}>
-          <Link to="/signup" className="lp-btn-white">Create Free Account →</Link>
-          <Link to="/login" className="lp-btn-ghost">I already have an account</Link>
-        </div>
-      </section>
-
-      {/* ── FOOTER ── */}
-      <footer className="lp-footer">
-        <div className="lp-inner">
-          <div className="lp-footer-top">
-            <div className="lp-footer-brand">
-              <div className="lp-footer-logo"><span className="lp-dot lp-dot-sm" /> Smart Nearby</div>
-              <p>Discover cafes, restaurants, gyms, and more — filtered by your mood, location, and budget.</p>
-            </div>
-            <div className="lp-footer-col">
-              <h4>Product</h4>
-              <ul>
-                <li><a href="#moods">Moods</a></li>
-                <li><a href="#how">How it works</a></li>
-                <li><a href="#features">Features</a></li>
-              </ul>
-            </div>
-            <div className="lp-footer-col">
-              <h4>Account</h4>
-              <ul>
-                <li><Link to="/signup">Sign up</Link></li>
-                <li><Link to="/login">Login</Link></li>
-              </ul>
-            </div>
-            <div className="lp-footer-col">
-              <h4>Cities</h4>
-              <ul>
-                {["Manipal","Mangalore","Bangalore","Mumbai","Hyderabad","Pune"].map(c => <li key={c}><a href="#moods">{c}</a></li>)}
-              </ul>
-            </div>
-          </div>
-          <div className="lp-footer-bottom">
-            <p>© 2025 Smart Nearby. Built with ❤️ in Manipal.</p>
-            <div className="lp-badges">
-              <span>React Native</span><span>Node.js</span><span>MongoDB</span>
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
+
+export default LandingPage;
